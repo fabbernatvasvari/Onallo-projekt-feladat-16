@@ -102,14 +102,7 @@ function startServer(){
 	});
 
 	app.get("/api/users", (req, res) => {
-		const { email, chat } = req.body;
-		if (!chatCashe[email]) {
-			return res.status(400).json({ message: "Email not found" });
-		}
-		if (chatCashe[email] != chat) {
-			return res.status(400).json({ message: "Invalid CHAT" });
-		}
-		delete chatCashe[email];
+		
 		res.status(200).json({ message: "CHAT verified successfully" });
 	})
 
@@ -126,14 +119,7 @@ function startServer(){
 	})
 
 	app.get("/api/messages", (req, res) => {
-		const { email, chat } = req.body;
-		if (!chatCashe[email]) {
-			return res.status(400).json({ message: "Email not found" });
-		}
-		if (chatCashe[email] != chat) {
-			return res.status(400).json({ message: "Invalid CHAT" });
-		}
-		delete chatCashe[email];
+		
 		res.status(200).json({ message: "CHAT verified successfully" });
 	})
 
