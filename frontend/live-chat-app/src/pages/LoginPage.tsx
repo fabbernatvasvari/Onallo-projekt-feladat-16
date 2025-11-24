@@ -24,7 +24,7 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <input
-          type="email"
+          type="test"
           placeholder="Felhasználónév"
           className="border p-2 rounded"
           onChange={(e) => setUsername(e.target.value)}

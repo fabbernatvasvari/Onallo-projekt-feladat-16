@@ -39,8 +39,7 @@ export default function App() {
             backgroundPosition: "center"
           }}
         >
-          <h1 className="text-3xl font-bold mb-4">Welcome</h1>
-          <p className="mb-4">You are not logged in.</p>
+          <h1 className="text-3xl font-bold mb-4">Üdvözlünk</h1>
 
           <button
             onClick={startChat}
