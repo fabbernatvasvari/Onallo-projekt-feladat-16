@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { register } from "../api/auth";
+import { toast } from "react-toastify";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState("");
@@ -11,13 +12,15 @@ export default function RegisterPage() {
         e.preventDefault();
         if (password !== confirmPassword) {
             alert("A jelszavak nem egyeznek!");
+            toast.info("A jelszavak nem egyeznek!");
             return;
         }
         const success = await register(username, email, password);
         if (success) {
             window.location.href = "/users";
         } else {
-            alert("Regisztráció sikertelen!");
+            alert("A regisztráció sikertelen!");
+            toast.info("A regisztráció sikertelen!");
         }
     }
 
