@@ -8,6 +8,12 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const token = await login(username, password);
+
+    if (typeof token !== "string") {
+      // login failed → handle it
+      return;
+    }
+
     localStorage.setItem("token", token);
     window.location.href = "/users";
   }

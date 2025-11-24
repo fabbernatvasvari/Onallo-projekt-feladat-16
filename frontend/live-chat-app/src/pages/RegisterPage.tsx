@@ -16,6 +16,14 @@ export default function RegisterPage() {
             return;
         }
         const success = await register(username, email, password);
+
+        if (typeof success !== "string") {
+            // registration failed
+            return;
+        }
+
+        localStorage.setItem("token", success);
+
         if (success) {
             window.location.href = "/users";
         } else {
@@ -24,41 +32,41 @@ export default function RegisterPage() {
         }
     }
 
-  return (
-    <div className="p-10 max-w-md mx-auto">
-        <h1 className="text-3xl mb-4">Regisztráció</h1>
-        
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <input
-                type="text"
-                placeholder="Felhasználónév"
-                className="border p-2 rounded"
-                onChange={(e) => setUsername(e.target.value)}
-            />
-            <input
-                type="email"
-                placeholder="E-mail"
-                className="border p-2 rounded"
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Jelszó"
-                className="border p-2 rounded"
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Jelszó megerősítése"
-                className="border p-2 rounded"
-                onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <button className="bg-blue-600 text-white p-2 rounded">
-                Regisztráció
-            </button>
-        </form>
+    return (
+        <div className="p-10 max-w-md mx-auto">
+            <h1 className="text-3xl mb-4">Regisztráció</h1>
 
-        <a className="text-blue-700" href="/">Bejelentkezés</a>
-    </div>
-  );
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+                <input
+                    type="text"
+                    placeholder="Felhasználónév"
+                    className="border p-2 rounded"
+                    onChange={(e) => setUsername(e.target.value)}
+                />
+                <input
+                    type="email"
+                    placeholder="E-mail"
+                    className="border p-2 rounded"
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <input
+                    type="password"
+                    placeholder="Jelszó"
+                    className="border p-2 rounded"
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+                <input
+                    type="password"
+                    placeholder="Jelszó megerősítése"
+                    className="border p-2 rounded"
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <button className="bg-blue-600 text-white p-2 rounded">
+                    Regisztráció
+                </button>
+            </form>
+
+            <a className="text-blue-700" href="/">Bejelentkezés</a>
+        </div>
+    );
 }
