@@ -16,8 +16,8 @@ export default function LoginPage() {
 
     localStorage.setItem("token", result.token);
 
-            const id = getUser(localStorage.getItem("user")?.toString()).id;
-            const email = getUser(localStorage.getItem("user")?.toString()).email;
+            const id = 1; // getUser(localStorage.getItem("user")?.toString()).id;
+            const email = "user@example.com"; // getUser(localStorage.getItem("user")?.toString()).email;
             localStorage.setItem("user", JSON.stringify({ id , email, username }));
 
     window.location.href = "/users";

@@ -4,7 +4,10 @@ import { Send, MessageSquare, Users, LogOut, ArrowLeft, Reply, Bell } from 'luci
 // Simulated database
 const db = {
   users: [
-    { id: 1, username: 'test', email: 'test@example.com', password_hash: '' }
+    { id: 1, username: 'test', email: 'test@example.com', password_hash: '' },
+    { id: 2, username: 'anna', email: 'anna@example.com', password_hash: btoa('anna123') },
+    { id: 3, username: 'péter', email: 'peter@example.com', password_hash: btoa('peter123') },
+    { id: 4, username: 'kata', email: 'kata@example.com', password_hash: btoa('kata123') }
   ],
   messages: []
 };
@@ -21,6 +24,10 @@ class ChatAPI {
   register(username, email, password) {
     return new Promise((resolve) => {
       setTimeout(() => {
+        if (!username || !email) {
+          resolve({ error: 'A felhasználónév és email megadása kötelező' });
+          return;
+        }
         const existingUser = db.users.find(u => u.username === username || u.email === email);
         if (existingUser) {
           resolve({ error: 'A felhasználónév vagy email már létezik' });
@@ -29,7 +36,7 @@ class ChatAPI {
             id: db.users.length + 1,
             username,
             email,
-            password_hash: btoa(password)
+            password_hash: password ? btoa(password) : ''
           };
           db.users.push(user);
           resolve({ success: true, user: { id: user.id, username: user.username, email: user.email } });
@@ -70,7 +77,7 @@ class ChatAPI {
     });
   }
 
-  sendMessage(recipientId, content, parentMsgId = null) {
+  sendMessage(recipientId, content) {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (!this.currentUser) {
@@ -81,7 +88,6 @@ class ChatAPI {
             sender_id: this.currentUser.id,
             recipient_id: recipientId,
             content,
-            parent_msg_id: parentMsgId,
             created_at: new Date().toISOString(),
             is_read: false
           };
@@ -175,10 +181,9 @@ export default function LiveChatApp() {
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [notification, setNotification] = useState(null);
-  const [replyingTo, setReplyingTo] = useState(null);
-  const [threadView, setThreadView] = useState(null);
-  const [threadMessages, setThreadMessages] = useState([]);
+  const [validationErrors, setValidationErrors] = useState({});
   const messagesEndRef = useRef(null);
+  const messageInputRef = useRef(null);
 
   // WebSocket listener
   useEffect(() => {
@@ -208,7 +213,7 @@ export default function LiveChatApp() {
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, threadMessages]);
+  }, [messages]);
 
   const showNotification = (text) => {
     setNotification(text);
@@ -227,12 +232,24 @@ export default function LiveChatApp() {
   };
 
   const handleRegister = async (username, email, password) => {
+    setValidationErrors({});
+    
+    const errors = {};
+    if (!username.trim()) errors.username = 'A felhasználónév megadása kötelező';
+    if (!email.trim()) errors.email = 'Az email megadása kötelező';
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
     const result = await api.register(username, email, password);
     if (result.success) {
       alert('Sikeres regisztráció! Most bejelentkezhetsz.');
       setView('login');
+      setValidationErrors({});
     } else {
-      alert(result.error);
+      setValidationErrors({ general: result.error });
     }
   };
 
@@ -255,23 +272,17 @@ export default function LiveChatApp() {
   const sendMessage = async () => {
     if (!messageInput.trim()) return;
 
-    const recipientId = replyingTo ? 
-      (messages.find(m => m.id === replyingTo)?.sender_id === currentUser.id ? 
-        messages.find(m => m.id === replyingTo)?.recipient_id : 
-        messages.find(m => m.id === replyingTo)?.sender_id) 
-      : selectedUser.id;
-
-    await api.sendMessage(recipientId, messageInput, replyingTo);
+    await api.sendMessage(selectedUser.id, messageInput);
     setMessageInput('');
-    setReplyingTo(null);
+    
+    // Keep focus on input
+    setTimeout(() => {
+      messageInputRef.current?.focus();
+    }, 0);
   };
 
   const viewThread = async (messageId) => {
-    setThreadView(messageId);
-    const result = await api.getThread(messageId);
-    if (result.success) {
-      setThreadMessages(result.replies);
-    }
+    // Thread functionality removed
   };
 
   const handleLogout = () => {
@@ -347,21 +358,40 @@ export default function LiveChatApp() {
             <h1 className="text-3xl font-bold text-gray-800">Live Chat</h1>
           </div>
           <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">Regisztráció</h2>
+          
+          {validationErrors.general && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {validationErrors.general}
+            </div>
+          )}
+          
           <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="Felhasználónév"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div>
+              <input
+                type="text"
+                placeholder="Felhasználónév"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className={`w-full px-4 py-3 border ${validationErrors.username ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 ${validationErrors.username ? 'focus:ring-red-500' : 'focus:ring-blue-500'}`}
+              />
+              {validationErrors.username && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.username}</p>
+              )}
+            </div>
+            
+            <div>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full px-4 py-3 border ${validationErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 ${validationErrors.email ? 'focus:ring-red-500' : 'focus:ring-blue-500'}`}
+              />
+              {validationErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
+              )}
+            </div>
+            
             <input
               type="password"
               placeholder="Jelszó"
@@ -376,7 +406,10 @@ export default function LiveChatApp() {
               Regisztráció
             </button>
             <button
-              onClick={() => setView('login')}
+              onClick={() => {
+                setView('login');
+                setValidationErrors({});
+              }}
               className="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-semibold"
             >
               Vissza a bejelentkezéshez
@@ -680,7 +713,7 @@ export default function LiveChatApp() {
       {view === 'register' && <RegisterView />}
       {view === 'users' && <UsersView />}
       {view === 'chat' && <ChatView />}
-      {threadView && <ThreadViewModal />}
+      {/* {threadView && <ThreadViewModal />} */}
       
       {notification && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-pulse z-50">
