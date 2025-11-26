@@ -33,7 +33,7 @@ export default function UserListPage() {
     },
     {
       id: "temp-g3",
-      username: "Írogatós Áron",
+      username: "Gurbán Ákos",
       avatar: "https://api.dicebear.com/7.x/pixel-art/svg?seed=SpacePotato",
     },
   ];
