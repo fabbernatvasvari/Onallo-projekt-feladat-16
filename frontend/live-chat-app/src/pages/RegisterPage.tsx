@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { register } from "../api/auth";
 import { toast } from "react-toastify";
+import IdGenerator from "../helperLibs/idGenerator";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState("");
@@ -23,6 +24,7 @@ export default function RegisterPage() {
         }
 
         localStorage.setItem("token", success);
+        localStorage.setItem("user", JSON.stringify({ id: IdGenerator.generateId(), email, username }));
 
         if (success) {
             window.location.href = "/users";

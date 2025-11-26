@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { login } from "../api/auth";
-
+import getUser from "../../../../backend/src/dbQuery";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +15,11 @@ export default function LoginPage() {
     }
 
     localStorage.setItem("token", result.token);
+
+            const id = getUser(localStorage.getItem("user")?.toString()).id;
+            const email = getUser(localStorage.getItem("user")?.toString()).email;
+            localStorage.setItem("user", JSON.stringify({ id , email, username }));
+
     window.location.href = "/users";
   }
 
@@ -44,3 +49,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+

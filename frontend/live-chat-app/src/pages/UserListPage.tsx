@@ -66,7 +66,7 @@ export default function UserListPage() {
       ></span>
     );
   }
-  const users = [...onlineUsers, ...offlineUsers];
+  const users = [...onlineUsers, ...offlineUsers]; // később kellhet
   
   return (
     <div className="p-10">
