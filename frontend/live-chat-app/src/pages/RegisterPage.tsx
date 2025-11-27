@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { register } from "../api/auth";
 import { toast } from "react-toastify";
-import IdGenerator from "../helperLibs/idGenerator";
+import IdGenerator from "../helperScripts/idGenerator";
 
 export default function RegisterPage() {
     const [username, setUsername] = useState("");
