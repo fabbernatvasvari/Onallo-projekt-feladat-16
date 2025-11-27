@@ -32,6 +32,7 @@ interface ApiResponse<T> {
 
 interface Database {
   users: User[];
+  exampleMessages: Message[];
   messages: Message[];
 }
 
@@ -43,8 +44,29 @@ const db: Database = {
     { id: 3, username: 'péter', email: 'peter@example.com', password_hash: btoa('peter123') },
     { id: 4, username: 'kata', email: 'kata@example.com', password_hash: btoa('kata123') }
   ],
+  exampleMessages: [
+    { id: 1, sender_id: 1, recipient_id: 2, content: 'Szia Anna!', created_at: new Date().toISOString(), is_read: false },
+    { id: 2, sender_id: 2, recipient_id: 1, content: 'Szia! Hogy vagy?', created_at: new Date().toISOString(), is_read: false },
+    { id: 3, sender_id: 1, recipient_id: 3, content: 'Helló Péter!', created_at: new Date().toISOString(), is_read: false },
+    { id: 4, sender_id: 3, recipient_id: 1, content: 'Szia! Miben segíthetek?', created_at: new Date().toISOString(), is_read: false }
+  ],
   messages: []
 };
+
+function saveDB() {
+  localStorage.setItem("db", JSON.stringify(db));
+}
+
+function loadDB() {
+  const raw = localStorage.getItem("db");
+  if (raw) {
+    const parsed = JSON.parse(raw);
+    db.users = parsed.users ?? [];
+    db.messages = parsed.messages ?? [];
+  }
+}
+
+loadDB();
 
 // Simulated API and WebSocket
 class ChatAPI {
@@ -71,6 +93,8 @@ class ChatAPI {
             password_hash: password ? btoa(password) : ''
           };
           db.users.push(user);
+          saveDB();
+          
           resolve({ success: true, user: { id: user.id, username: user.username, email: user.email } });
         }
       }, 300);
@@ -124,7 +148,8 @@ class ChatAPI {
             is_read: false
           };
           db.messages.push(message);
-          
+          saveDB();
+
           // Simulate WebSocket broadcast
           this.broadcastMessage(message);
           
