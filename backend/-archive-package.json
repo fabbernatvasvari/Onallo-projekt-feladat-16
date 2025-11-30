@@ -1,23 +1,30 @@
 {
-  "name": "backend",
+  "name": "onallo-projekt-feladat-16",
   "version": "1.0.0",
-  "description": "Live Chat App Backend",
   "main": "endpoints.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
     "start": "node server.js"
   },
   "keywords": [],
-  "author": "Fábián Bernát",
+  "author": "",
   "license": "ISC",
+  "description": "",
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.17",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "nodemailer": "^7.0.10",
     "randomstring": "^1.3.0",
     "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "tailwindcss": "^4.1.17"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "nodemon": "^3.1.11"
   }
 }

@@ -31,6 +31,7 @@ import express from "express";
 import nodemailer from "nodemailer";
 import randomstring from "randomstring";
 import "dotenv/config";
+import e from "express";
 
 function startServer(){
 
@@ -144,4 +145,4 @@ function startServer(){
 	});
 }
 
-startServer();
+export default startServer;

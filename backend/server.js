@@ -8,6 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+startServer();
 // ROUTES
 // const userRoutes = require("./routes/users"); // this also does not work with import, because CJS module
 import userRoutes from "./routes/users.js";
