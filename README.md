@@ -1,4 +1,15 @@
-# Chat app
+# Live Chat App - valós idejű üzenetküldő alkalmazás.
+## Használat
+A `backend\src`, valamint a `frontend\live-chat-app\src` mappában 
+```sh
+npm install
+```
+kiadása, majd 
+```
+npm run dev
+```
+vagy VSCode-ban indítás a `package.json`ban található play gombok megnyomásával
+vagy a `package.json`ban található parancsok kiadása a terminálban.
 ## Routes:
 http://localhost:3002/
 
