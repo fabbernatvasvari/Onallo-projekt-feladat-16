@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, MessageSquare, Users, LogOut, ArrowLeft, Bell } from 'lucide-react';
+import { Send, MessageSquare, Users, LogOut, ArrowLeft, Bell, Sun, Moon } from 'lucide-react';
 
 
 // Types
@@ -70,8 +70,11 @@ function loadDB() {
 loadDB();
 
 function resetMessages() {
-  db.messages = [];
-  saveDB();
+  const currentUserId = api.currentUser?.id;
+  if (currentUserId) {
+    db.messages = db.messages.filter(m => m.sender_id !== currentUserId);
+    saveDB();
+  }
 }
 
 // Simulated API and WebSocket
@@ -250,6 +253,18 @@ export default function LiveChatApp() {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
+
+  // Dark mode state
+  const storedDarkMode = typeof window !== 'undefined' ? localStorage.getItem('darkMode') === 'true' : false;
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(storedDarkMode);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(prev => {
+      const newMode = !prev;
+      localStorage.setItem('darkMode', newMode.toString());
+      return newMode;
+    });
+  };
 
   // Region selection modal state
   const storedCountry = typeof window !== 'undefined' ? localStorage.getItem('selectedCountry') : null;
@@ -526,8 +541,8 @@ export default function LiveChatApp() {
 
   // Users List View
   const UsersView = () => (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-blue-600 text-white p-4 shadow-md">
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'}`}>
+      <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-blue-600'} text-white p-4 shadow-md`}>
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
             <Users className="w-6 h-6 mr-2" />
@@ -542,6 +557,14 @@ export default function LiveChatApp() {
               className="flex items-center bg-yellow-500 px-3 py-2 rounded hover:bg-yellow-600 transition"
             >
               Összes chat törlése
+            </button>
+
+            <button
+              onClick={toggleDarkMode}
+              className="flex items-center bg-gray-600 p-2 rounded hover:bg-gray-700 transition"
+              title={isDarkMode ? 'Nappali mód' : 'Éjszakai mód'}
+            >
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
 
             <button
@@ -560,9 +583,9 @@ export default function LiveChatApp() {
         </div>
       </div>
       <div className="max-w-4xl mx-auto p-4">
-        <div className="bg-white rounded-lg shadow-md">
+        <div className={`${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md`}>
           {users.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className={`p-8 text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               Nincsenek más felhasználók
             </div>
           ) : (
@@ -570,11 +593,11 @@ export default function LiveChatApp() {
               {users.map(user => (
                 <div
                   key={user.id}
-                  className="p-4 hover:bg-gray-50 transition flex items-center justify-between"
+                  className={`p-4 transition flex items-center justify-between ${isDarkMode ? 'hover:bg-gray-700 border-gray-700' : 'hover:bg-gray-50 border-gray-200'} border-b last:border-b-0`}
                 >
                   <div>
-                    <h3 className="font-semibold text-gray-800">{user.username}</h3>
-                    <p className="text-sm text-gray-500">{user.email}</p>
+                    <h3 className={`font-semibold ${isDarkMode ? 'text-gray-100' : 'text-gray-800'}`}>{user.username}</h3>
+                    <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{user.email}</p>
                   </div>
                   <button
                     onClick={() => loadConversation(user)}
@@ -606,8 +629,8 @@ export default function LiveChatApp() {
     };
 
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
-        <div className="bg-blue-600 text-white p-4 shadow-md">
+      <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900' : 'bg-gray-100'} flex flex-col`}>
+        <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-blue-600'} text-white p-4 shadow-md`}>
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center">
               <button
@@ -616,27 +639,36 @@ export default function LiveChatApp() {
                   setSelectedUser(null);
                   setMessages([]);
                 }}
-                className="mr-4 hover:bg-blue-700 p-2 rounded transition"
+                className={`mr-4 p-2 rounded transition ${isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-blue-700'}`}
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <MessageSquare className="w-6 h-6 mr-2" />
               <h1 className="text-xl font-bold">Chat: {selectedUser?.username}</h1>
             </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center bg-red-500 px-3 py-2 rounded hover:bg-red-600 transition"
-            >
-              <LogOut className="w-4 h-4 mr-1" />
-              Kilépés
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleDarkMode}
+                className="flex items-center bg-gray-600 p-2 rounded hover:bg-gray-700 transition"
+                title={isDarkMode ? 'Nappali mód' : 'Éjszakai mód'}
+              >
+                {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex items-center bg-red-500 px-3 py-2 rounded hover:bg-red-600 transition"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                Kilépés
+              </button>
+            </div>
           </div>
         </div>
 
         <div className="flex-1 max-w-4xl mx-auto w-full p-4 overflow-hidden flex flex-col">
-          <div className="flex-1 bg-white rounded-lg shadow-md overflow-y-auto p-4 mb-4">
+          <div className={`flex-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md overflow-y-auto p-4 mb-4`}>
             {messages.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
+              <div className={`text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} py-8`}>
                 Még nincsenek üzenetek. Kezdj el beszélgetni!
               </div>
             ) : (
@@ -647,15 +679,21 @@ export default function LiveChatApp() {
 
                   return (
                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs lg:max-w-md ${isOwn ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800'} rounded-lg p-3 shadow`}>
+                      <div className={`max-w-xs lg:max-w-md rounded-lg p-3 shadow ${
+                        isOwn ? 'bg-blue-600 text-white' : isDarkMode ? 'bg-gray-700 text-gray-100' : 'bg-gray-200 text-gray-800'
+                      }`}>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-semibold">{sender?.username}</span>
-                          <span className={`text-xs ${isOwn ? 'text-blue-100' : 'text-gray-500'}`}>
+                          <span className={`text-xs ${
+                            isOwn ? 'text-blue-100' : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+                          }`}>
                             {new Date(msg.created_at).toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                         {msg.parent_msg_id && (
-                          <div className={`text-xs ${isOwn ? 'bg-blue-700' : 'bg-gray-300'} rounded p-2 mb-2 italic`}>
+                          <div className={`text-xs rounded p-2 mb-2 italic ${
+                            isOwn ? 'bg-blue-700' : isDarkMode ? 'bg-gray-600' : 'bg-gray-300'
+                          }`}>
                             Válasz: {getReplyPreview(msg.parent_msg_id)}
                           </div>
                         )}
@@ -669,7 +707,7 @@ export default function LiveChatApp() {
             )}
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4">
+          <div className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-4`}>
             <div className="flex space-x-2">
               <input
                 ref={messageInputRef}
@@ -678,7 +716,9 @@ export default function LiveChatApp() {
                 onChange={(e) => setMessageInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder="Írj egy üzenetet..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-black placeholder-gray-500'
+                }`}
               />
               <button
                 onClick={sendMessage}
