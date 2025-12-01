@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, MessageSquare, Users, LogOut, ArrowLeft, Bell } from 'lucide-react';
 
+
 // Types
 interface User {
   id: number;
@@ -100,7 +101,7 @@ class ChatAPI {
           };
           db.users.push(user);
           saveDB();
-          
+
           resolve({ success: true, user: { id: user.id, username: user.username, email: user.email } });
         }
       }, 300);
@@ -160,7 +161,7 @@ class ChatAPI {
 
           // Simulate WebSocket broadcast
           this.broadcastMessage(message);
-          
+
           resolve({ success: true, message });
         }
       }, 200);
@@ -173,7 +174,7 @@ class ChatAPI {
         if (!this.currentUser) {
           resolve({ error: 'Nem vagy bejelentkezve' });
         } else {
-          const messages = db.messages.filter(m => 
+          const messages = db.messages.filter(m =>
             m.sender_id === this.currentUser!.id || m.recipient_id === this.currentUser!.id
           );
           resolve({ success: true, messages });
@@ -188,18 +189,18 @@ class ChatAPI {
         if (!this.currentUser) {
           resolve({ error: 'Nem vagy bejelentkezve' });
         } else {
-          const messages = db.messages.filter(m => 
+          const messages = db.messages.filter(m =>
             (m.sender_id === this.currentUser!.id && m.recipient_id === userId) ||
             (m.sender_id === userId && m.recipient_id === this.currentUser!.id)
           ).sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-          
+
           // Mark messages as read
           messages.forEach(m => {
             if (m.recipient_id === this.currentUser!.id) {
               m.is_read = true;
             }
           });
-          
+
           resolve({ success: true, messages });
         }
       }, 200);
@@ -250,31 +251,71 @@ export default function LiveChatApp() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageInputRef = useRef<HTMLInputElement>(null);
 
+  // Region selection modal state
+  const storedCountry = typeof window !== 'undefined' ? localStorage.getItem('selectedCountry') : null;
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(storedCountry);
+  const [showRegionModal, setShowRegionModal] = useState<boolean>(() => !storedCountry);
+  const [countries, setCountries] = useState<string[]>([]);
+  const [countrySearch, setCountrySearch] = useState('');
+  const [pendingCountry, setPendingCountry] = useState<string | null>(null);
+
   // WebSocket listener
   useEffect(() => {
     if (!currentUser) return;
 
     const unsubscribe = api.subscribeToMessages((message) => {
+
+      // Az aktuális értékeket closure-ből veszi, nem kell dependency. MI van???
+      const currentSelectedUserId = selectedUser?.id;
+
       if (message.recipient_id === currentUser.id) {
         const sender = users.find(u => u.id === message.sender_id);
         showNotification(`Új üzenet ${sender?.username || 'Ismeretlen'} felhasználótól`);
 
-        if (selectedUser && message.sender_id === selectedUser.id) {
+        if (currentSelectedUserId && message.sender_id === currentSelectedUserId) {
           setMessages(prev => [...prev, message]);
         }
       }
 
       if (message.sender_id === currentUser.id &&
-          selectedUser &&
-          message.recipient_id === selectedUser.id) {
+        currentSelectedUserId &&
+        message.recipient_id === currentSelectedUserId) {
         setMessages(prev => [...prev, message]);
       }
     });
 
     return unsubscribe;
 
-  // ❗ only depend on currentUser
+    // ❗ only depend on currentUser
   }, [currentUser]);
+
+  // Fetch list of countries if the modal should be shown
+  useEffect(() => {
+    if (!showRegionModal) return;
+
+    let cancelled = false;
+    fetch('https://restcountries.com/v3.1/all?fields=name')
+      .then(res => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        const list = (data || []).map((c: any) => c.name?.common || '').filter(Boolean).sort((a: string, b: string) => a.localeCompare(b));
+        setCountries(list);
+      })
+      .catch((err) => {
+        console.error('Failed to load countries', err);
+      });
+
+    return () => { cancelled = true; };
+  }, [showRegionModal]);
+
+  const handleCountrySelect = (country: string | null) => {
+    if (!country) return;
+    setSelectedCountry(country);
+    localStorage.setItem('selectedCountry', country);
+    setShowRegionModal(false);
+  };
+
+  const filteredCountries = countries.filter(c => c.toLowerCase().includes(countrySearch.toLowerCase()));
 
 
   // Auto-scroll to bottom
@@ -300,16 +341,16 @@ export default function LiveChatApp() {
 
   const handleRegister = async (username: string, email: string, password: string) => {
     setValidationErrors({});
-    
+
     const errors: Record<string, string> = {};
     if (!username.trim()) errors.username = 'A felhasználónév megadása kötelező';
     if (!email.trim()) errors.email = 'Az email megadása kötelező';
-    
+
     if (Object.keys(errors).length > 0) {
       setValidationErrors(errors);
       return;
     }
-    
+
     const result = await api.register(username, email, password);
     if (result.success) {
       alert('Sikeres regisztráció! Most bejelentkezhetsz.');
@@ -341,7 +382,7 @@ export default function LiveChatApp() {
 
     await api.sendMessage(selectedUser.id, messageInput);
     setMessageInput('');
-    
+
     // Keep focus on input
     setTimeout(() => {
       messageInputRef.current?.focus();
@@ -421,13 +462,13 @@ export default function LiveChatApp() {
             <h1 className="text-3xl font-bold text-gray-800">Live Chat</h1>
           </div>
           <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">Regisztráció</h2>
-          
+
           {validationErrors.general && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
               {validationErrors.general}
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div>
               <input
@@ -441,7 +482,7 @@ export default function LiveChatApp() {
                 <p className="text-red-500 text-sm mt-1">{validationErrors.username}</p>
               )}
             </div>
-            
+
             <div>
               <input
                 type="email"
@@ -454,7 +495,7 @@ export default function LiveChatApp() {
                 <p className="text-red-500 text-sm mt-1">{validationErrors.email}</p>
               )}
             </div>
-            
+
             <input
               type="password"
               placeholder="Jelszó"
@@ -494,7 +535,7 @@ export default function LiveChatApp() {
           </div>
           <div className="flex items-center space-x-4">
             <span className="text-sm">Bejelentkezve mint: {currentUser?.username}</span>
-            
+
             {/* Gondolom ide kéne rakni a ` reset messages ` gombot */}
             <button
               onClick={resetMessages}
@@ -502,17 +543,17 @@ export default function LiveChatApp() {
             >
               Összes chat törlése
             </button>
-            
+
             <button
               onClick={handleLogout}
               className="flex items-center bg-red-500 px-3 py-2 rounded hover:bg-red-600 transition"
             >
-              
+
               <LogOut className="w-4 h-4 mr-1" />
               Kilépés
             </button>
 
-            
+
 
 
           </div>
@@ -603,7 +644,6 @@ export default function LiveChatApp() {
                 {messages.filter(m => !m.parent_msg_id).map(msg => {
                   const sender = getMessageSender(msg);
                   const isOwn = msg.sender_id === currentUser?.id;
-                  const hasReplies = messages.some(m => m.parent_msg_id === msg.id);
 
                   return (
                     <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
@@ -659,7 +699,46 @@ export default function LiveChatApp() {
       {view === 'register' && <RegisterView />}
       {view === 'users' && <UsersView />}
       {view === 'chat' && <ChatView />}
-      
+
+      {showRegionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-xl mx-4">
+            <h2 className="text-xl font-semibold mb-2">Select region</h2>
+            <p className="text-sm text-gray-600 mb-4">Please choose your country to continue.</p>
+            <input
+              type="text"
+              placeholder="Search countries..."
+              value={countrySearch}
+              onChange={(e) => setCountrySearch(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded mb-3"
+            />
+            {countries.length === 0 ? (
+              <div className="py-6 text-center text-gray-600">Loading countries...</div>
+            ) : (
+              <select
+                size={8}
+                value={pendingCountry ?? ''}
+                onChange={(e) => setPendingCountry(e.target.value)}
+                className="w-full border rounded p-2 text-sm"
+              >
+                {filteredCountries.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            )}
+
+            <div className="flex justify-end mt-4 space-x-2">
+              <button
+                onClick={() => handleCountrySelect(pendingCountry ?? (countries[0] ?? null))}
+                disabled={!pendingCountry && countries.length === 0}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {notification && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-pulse z-50">
           <Bell className="w-5 h-5" />
