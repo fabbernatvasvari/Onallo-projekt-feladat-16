@@ -3,6 +3,7 @@ const en = {
   register: 'Register',
   username: 'Username',
   password: 'Password',
+  email: 'Email',
   demo: 'Demo: username "test", no password',
   users: 'Users',
   loggedInAs: 'Logged in as',

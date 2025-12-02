@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Send, MessageSquare, Users, LogOut, ArrowLeft, Bell, Sun, Moon, Languages } from 'lucide-react';
 import en from './i18n_en';
+import hu from './i18n_hu';
 
 
 // Types
@@ -278,8 +279,8 @@ export default function LiveChatApp() {
     });
   };
 
-  const t = (key: keyof typeof en, huDefault: string) => {
-    return lang === 'en' ? (en[key] ?? huDefault) : huDefault;
+  const t = (key: keyof typeof en) => {
+    return lang === 'en' ? (en[key] ?? String(key)) : (hu[key as keyof typeof hu] ?? String(key));
   };
 
   // Region selection modal state
@@ -386,7 +387,7 @@ export default function LiveChatApp() {
 
     const result = await api.register(username, email, password);
     if (result.success) {
-      alert('Sikeres regisztráció! Most bejelentkezhetsz.');
+      alert(t('registrationSuccess'));
       setView('login');
       setValidationErrors({});
     } else {
@@ -443,18 +444,18 @@ export default function LiveChatApp() {
             <MessageSquare className="w-12 h-12 text-blue-600 mr-3" />
             <h1 className="text-3xl font-bold text-gray-800">Live Chat</h1>
           </div>
-          <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">{t('login', 'Bejelentkezés')}</h2>
+          <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">{t('login')}</h2>
           <div className="space-y-4">
             <input
               type="text"
-              placeholder={t('username', 'Felhasználónév')}
+              placeholder={t('username')}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="password"
-              placeholder={t('password', 'Jelszó')}
+              placeholder={t('password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleLogin(username, password)}
@@ -464,17 +465,17 @@ export default function LiveChatApp() {
               onClick={() => handleLogin(username, password)}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
             >
-              {t('login', 'Bejelentkezés')}
+              {t('login')}
             </button>
             <button
               onClick={() => setView('register')}
               className="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-semibold"
             >
-              {t('register', 'Regisztráció')}
+              {t('register')}
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-4 text-center">
-            {t('demo', 'Demo: username "test", jelszó nélkül')}
+            {t('demo')}
           </p>
         </div>
       </div>
@@ -494,7 +495,7 @@ export default function LiveChatApp() {
             <MessageSquare className="w-12 h-12 text-blue-600 mr-3" />
             <h1 className="text-3xl font-bold text-gray-800">Live Chat</h1>
           </div>
-          <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">{t('register','Regisztráció')}</h2>
+          <h2 className="text-xl font-semibold mb-6 text-center text-gray-700">{t('register')}</h2>
 
           {validationErrors.general && (
             <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -506,7 +507,7 @@ export default function LiveChatApp() {
             <div>
               <input
                 type="text"
-                placeholder={t('username','Felhasználónév')}
+                placeholder={t('username')}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className={`w-full px-4 py-3 border ${validationErrors.username ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 ${validationErrors.username ? 'focus:ring-red-500' : 'focus:ring-blue-500'}`}
@@ -519,7 +520,7 @@ export default function LiveChatApp() {
             <div>
               <input
                 type="email"
-                placeholder={t('email','Email')}
+                placeholder={t('email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full px-4 py-3 border ${validationErrors.email ? 'border-red-500' : 'border-gray-300'} rounded-lg focus:outline-none focus:ring-2 ${validationErrors.email ? 'focus:ring-red-500' : 'focus:ring-blue-500'}`}
@@ -531,7 +532,7 @@ export default function LiveChatApp() {
 
             <input
               type="password"
-              placeholder={t('password','Jelszó')}
+              placeholder={t('password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -540,7 +541,7 @@ export default function LiveChatApp() {
               onClick={() => handleRegister(username, email, password)}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
             >
-              {t('register','Regisztráció')}
+              {t('register')}
             </button>
             <button
               onClick={() => {
@@ -549,7 +550,7 @@ export default function LiveChatApp() {
               }}
               className="w-full bg-gray-200 text-gray-700 py-3 rounded-lg hover:bg-gray-300 transition font-semibold"
             >
-              {t('backToLogin','Vissza a bejelentkezéshez')}
+              {t('backToLogin')}
             </button>
           </div>
         </div>
@@ -564,17 +565,17 @@ export default function LiveChatApp() {
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center">
               <Users className="w-6 h-6 mr-2" />
-              <h1 className="text-xl font-bold">{t('users','Felhasználók')}</h1>
+              <h1 className="text-xl font-bold">{t('users')}</h1>
             </div>
           <div className="flex items-center space-x-4">
-              <span className="text-sm">{t('loggedInAs','Bejelentkezve mint')}: {currentUser?.username}</span>
+              <span className="text-sm">{t('loggedInAs')}: {currentUser?.username}</span>
 
             {/* Gondolom ide kéne rakni a ` reset messages ` gombot */}
             <button
               onClick={resetMessages}
               className="flex items-center bg-yellow-500 px-3 py-2 rounded hover:bg-yellow-600 transition"
             >
-              {t('deleteMyMessages','Összes chat törlése')}
+              {t('deleteMyMessages')}
             </button>
 
             <button
@@ -600,7 +601,7 @@ export default function LiveChatApp() {
             >
 
               <LogOut className="w-4 h-4 mr-1" />
-              {t('logout','Kilépés')}
+              {t('logout')}
             </button>
 
 
@@ -613,7 +614,7 @@ export default function LiveChatApp() {
         <div className={`${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-md`}>
           {users.length === 0 ? (
             <div className={`p-8 text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              {t('noOtherUsers','Nincsenek más felhasználók')}
+              {t('noOtherUsers')}
             </div>
           ) : (
             <div className="divide-y">
@@ -631,7 +632,7 @@ export default function LiveChatApp() {
                     className="flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
                   >
                     <MessageSquare className="w-4 h-4 mr-2" />
-                    {t('sendMessage','Üzenet küldése')}
+                    {t('sendMessage')}
                   </button>
                 </div>
               ))}
@@ -671,7 +672,7 @@ export default function LiveChatApp() {
                 <ArrowLeft className="w-5 h-5" />
               </button>
               <MessageSquare className="w-6 h-6 mr-2" />
-              <h1 className="text-xl font-bold">{t('chat','Chat')}: {selectedUser?.username}</h1>
+              <h1 className="text-xl font-bold">{t('chat')}: {selectedUser?.username}</h1>
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -694,7 +695,7 @@ export default function LiveChatApp() {
                 className="flex items-center bg-red-500 px-3 py-2 rounded hover:bg-red-600 transition"
               >
                 <LogOut className="w-4 h-4 mr-1" />
-                {t('logout','Kilépés')}
+                {t('logout')}
               </button>
             </div>
           </div>
@@ -704,7 +705,7 @@ export default function LiveChatApp() {
           <div className={`flex-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md overflow-y-auto p-4 mb-4`}>
             {messages.length === 0 ? (
               <div className={`text-center ${isDarkMode ? 'text-gray-400' : 'text-gray-500'} py-8`}>
-                {t('noMessages','Még nincsenek üzenetek. Kezdj el beszélgetni!')}
+                {t('noMessages')}
               </div>
             ) : (
               <div className="space-y-4">
@@ -750,7 +751,7 @@ export default function LiveChatApp() {
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                placeholder={t('typeMessage','Írj egy üzenetet...')}
+                placeholder={t('typeMessage')}
                 className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                   isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-black placeholder-gray-500'
                 }`}
@@ -778,17 +779,17 @@ export default function LiveChatApp() {
       {showRegionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-xl mx-4">
-            <h2 className="text-xl font-semibold mb-2">{t('selectRegion','Select region')}</h2>
-            <p className="text-sm text-gray-600 mb-4">{t('selectRegionDesc','Please choose your country to continue.')}</p>
+            <h2 className="text-xl font-semibold mb-2">{t('selectRegion')}</h2>
+            <p className="text-sm text-gray-600 mb-4">{t('selectRegionDesc')}</p>
             <input
               type="text"
-              placeholder={t('searchCountries','Search countries...')}
+              placeholder={t('searchCountries')}
               value={countrySearch}
               onChange={(e) => setCountrySearch(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded mb-3"
             />
             {countries.length === 0 ? (
-              <div className="py-6 text-center text-gray-600">{t('loadingCountries','Loading countries...')}</div>
+              <div className="py-6 text-center text-gray-600">{t('loadingCountries')}</div>
             ) : (
               <select
                 size={8}
@@ -808,7 +809,7 @@ export default function LiveChatApp() {
                 disabled={!pendingCountry && countries.length === 0}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
               >
-                {t('continue','Folytatás')}
+                {t('continue')}
               </button>
             </div>
           </div>

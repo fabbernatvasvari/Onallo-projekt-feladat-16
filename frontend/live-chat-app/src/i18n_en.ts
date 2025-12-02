@@ -28,6 +28,7 @@ const en = {
   newMessageFrom: 'New message from {name}',
   unknown: 'Unknown',
   replyPrefix: 'Reply: '
+  ,registrationSuccess: 'Registration successful! You can now login.'
 };
 
 export default en;
