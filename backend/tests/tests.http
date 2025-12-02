@@ -1,0 +1,33 @@
+### Health: root
+GET http://localhost:3001/ HTTP/1.1
+
+### Health: users list (should return 200 if server is alive)
+GET http://localhost:3001/api/users HTTP/1.1
+Accept: application/json
+
+### Health: messages list (another simple GET endpoint)
+GET http://localhost:3001/api/messages HTTP/1.1
+Accept: application/json
+
+### POST: register (sends OTP/chat) — useful to test POST handling
+POST http://localhost:3001/api/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "test@example.com"
+}
+
+### POST: login (verify OTP/chat). Note: the server generates a random chat, so
+### this will usually fail unless you set the correct `chat` value returned
+### from the register step. Keep it for integration testing.
+POST http://localhost:3001/api/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "chat": "1234"
+}
+
+### Quick PowerShell commands you can run instead of REST Client:
+### Invoke-RestMethod -Uri http://localhost:3001/api/users -Method GET
+### Invoke-RestMethod -Uri http://localhost:3001/ -Method GET
