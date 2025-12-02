@@ -13,7 +13,8 @@ app.use(express.json());
 startServer(app);  
 
 // user routes
-// const userRoutes = require("./routes/users"); // this also does not work with import, because CJS module
+// In this project the routes file lives under `src/routes/users.js`.
+// Import the file with its actual relative path and extension (ESM requires the exact path).
 import userRoutes from "./routes/users.js";
 
 app.use("/api/users", userRoutes);

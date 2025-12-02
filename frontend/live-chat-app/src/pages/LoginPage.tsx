@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { login } from "../api/auth";
-import getUser from "../../../../backend/src/dbQuery";
+import getUser from "../../../../backend/uils/dbQuery";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

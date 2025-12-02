@@ -75,7 +75,7 @@ function startServer(){
 
 	// ---------------- API ROUTES ----------------
 	// ❌ don’t create a new server
-	const app = undefined; // placeholder for the passed express app instance
+	const app = express(); // placeholder for the passed express app instance
 
 	app.use(express.static("public"));
 
