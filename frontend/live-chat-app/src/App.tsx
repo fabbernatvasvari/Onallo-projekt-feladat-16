@@ -44,7 +44,7 @@ const db: Database = {
   users: [
     { id: 1, username: 'test', email: 'test@example.com', password_hash: '' },
     { id: 2, username: 'anna', email: 'anna@example.com', password_hash: btoa('anna123') },
-    { id: 3, username: 'péter', email: 'peter@example.com', password_hash: btoa('peter123') },
+    { id: 3, username: 'peter', email: 'peter@example.com', password_hash: btoa('peter123') },
     { id: 4, username: 'kata', email: 'kata@example.com', password_hash: btoa('kata123') }
   ],
   exampleMessages: [
@@ -644,7 +644,7 @@ export default function LiveChatApp() {
   );
 
   // Chat View
-  const ChatView = () => {
+  const ChatView = ({ messageInput, setMessageInput, sendMessage }) => {
     const getMessageSender = (msg: Message): User | undefined => {
       if (msg.sender_id === currentUser?.id) return currentUser;
       return users.find(u => u.id === msg.sender_id) || selectedUser || undefined;
@@ -774,7 +774,7 @@ export default function LiveChatApp() {
       {view === 'login' && <LoginView />}
       {view === 'register' && <RegisterView />}
       {view === 'users' && <UsersView />}
-      {view === 'chat' && <ChatView />}
+      {view === 'chat' && <ChatView messageInput={undefined} setMessageInput={undefined} sendMessage={undefined} />}
 
       {showRegionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
